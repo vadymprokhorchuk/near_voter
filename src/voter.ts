@@ -144,22 +144,22 @@ class Voter {
     invites: UnorderedMap<string> = new UnorderedMap("invites");
 
     @view({})
-    votesCount(): number {
+    votes_count(): number {
         return this.votes.length
     }
 
     @view({})
-    votesAnswersCount(): number {
+    votes_answers_count(): number {
         return this.votesAnswers.length
     }
 
     @view({})
-    getVote({index}:{index:number}): Vote {
-        return this.votes.get(index)
+    get_vote({voteIndex}:{voteIndex:number}): Vote {
+        return this.votes.get(voteIndex)
     }
 
     @view({})
-    getVoteWinner({voteIndex}:{voteIndex:number}): number {
+    get_vote_winner({voteIndex}:{voteIndex:number}): number {
         const foundVote = this.votes.get(voteIndex)
         if (foundVote){
             assert(near.blockTimestamp() > foundVote.end, 'Voting is not ended')
@@ -198,27 +198,27 @@ class Voter {
     }
 
     @view({})
-    getVoteAnswers({voteIndex}:{voteIndex:number}): object {
+    get_vote_answers({voteIndex}:{voteIndex:number}): object {
         return this.votesAnswers.get(voteIndex)
     }
 
     @view({})
-    getVotes({voteIndex}:{voteIndex:number}): object {
+    get_votes({voteIndex}:{voteIndex:number}): object {
         return this.votesAnswers.get(voteIndex)
     }
 
     @view({})
-    isAdmin({address}:{address:string}): boolean {
+    is_admin({address}:{address:string}): boolean {
         return this.admins.toArray().includes(address.toLowerCase())
     }
     
     @view({})
-    isHaveRights({address}:{address:string}): boolean {
-        return address === near.currentAccountId() || this.isAdmin({address: address})
+    is_have_rights({address}:{address:string}): boolean {
+        return address === near.currentAccountId() || this.is_admin({address: address})
     }
 
     @view({})
-    findStudentByAddress({address}:{address:string}): { student: Student; key: string } {
+    find_student_by_address({address}:{address:string}): { student: Student; key: string } {
         const users = this.students.toArray()
         for (const user of users){
             const key = user[0]
@@ -232,13 +232,13 @@ class Voter {
         }
         return null
     }
-    
+
     @call({})
-    createVote({title, description, options, end, allowedVoters}:{title:string,description:string, options: Vector<string>, end:bigint, allowedVoters: AllowedVoters}){
+    create_vote({title, description, options, end, allowedVoters}:{title:string,description:string, options: Vector<string>, end:bigint, allowedVoters: AllowedVoters}){
         const noHaveRights = 'You no have rights to create this vote'
-        if (near.predecessorAccountId() !== near.currentAccountId() && !this.isAdmin({address: near.predecessorAccountId()})){
+        if (near.predecessorAccountId() !== near.currentAccountId() && !this.is_admin({address: near.predecessorAccountId()})){
             if (allowedVoters.allowed === 'group'){
-                const foundStudent = this.findStudentByAddress({address: near.predecessorAccountId()})
+                const foundStudent = this.find_student_by_address({address: near.predecessorAccountId()})
                 assert(foundStudent, noHaveRights)
                 if (!foundStudent.student.groups.includes(allowedVoters.groupKey)){
                    throw Error(noHaveRights)
@@ -253,11 +253,11 @@ class Voter {
         this.votesAnswers.push({})
         return true
     }
-    
+
     @call({})
     vote({voteIndex, voteOption}:{voteIndex:number, voteOption:number}){
         const notAllowedToVote = 'You not allowed to vote in this vote'
-        const foundStudent = this.findStudentByAddress({address: near.predecessorAccountId()})
+        const foundStudent = this.find_student_by_address({address: near.predecessorAccountId()})
         if (foundStudent){
             const foundVote = this.votes.get(voteIndex)
             if (foundVote){
@@ -311,7 +311,7 @@ class Voter {
                 
                 this.votesAnswers.replace(voteIndex, answers)
 
-                return JSON.stringify(this.votesAnswers.toArray())
+                return true
 
             }else{
                 throw Error(`Vote with index ${voteIndex} not found`)
@@ -322,11 +322,11 @@ class Voter {
     }
 
     @call({})
-    createStudents({students}:{students:Student[]}){
-        if (this.isHaveRights({address:near.predecessorAccountId()})){
+    create_students({students}:{students:Student[]}){
+        if (this.is_have_rights({address:near.predecessorAccountId()})){
             const addedStudents = []
             for (const student of students){
-                assert(!this.findStudentByAddress({address: student.address}), `Student with address ${student.address} already exist`)
+                assert(!this.find_student_by_address({address: student.address}), `Student with address ${student.address} already exist`)
                 const key = this.studentsCounter.toString()
                 let groups
                 if (student.groups){
@@ -354,8 +354,8 @@ class Voter {
     }
 
     @call({})
-    deleteStudents({students}:{students:string[]}){
-        if (this.isHaveRights({address:near.predecessorAccountId()})){
+    delete_students({students}:{students:string[]}){
+        if (this.is_have_rights({address:near.predecessorAccountId()})){
             for (const student of students){
                 this.students.remove(student)
             }
@@ -366,13 +366,13 @@ class Voter {
     }
 
     @view({})
-    getStudents(): [string, Student][] {
+    get_students(): [string, Student][] {
         return this.students.toArray()
     }
 
     @call({})
-    createUniversities({universities}:{universities:University[]}){
-        if (this.isHaveRights({address:near.predecessorAccountId()})){
+    create_universities({universities}:{universities:University[]}){
+        if (this.is_have_rights({address:near.predecessorAccountId()})){
             const addedUniversities = []
             for (const university of universities){
                 const key = this.universitiesCounter.toString()
@@ -391,8 +391,8 @@ class Voter {
     }
 
     @call({})
-    deleteUniversities({universities}:{universities:string[]}){
-        if (this.isHaveRights({address:near.predecessorAccountId()})){
+    delete_universities({universities}:{universities:string[]}){
+        if (this.is_have_rights({address:near.predecessorAccountId()})){
             const facultiesToDelete = []
             const departmentsToDelete = []
             const groupsToDelete = []
@@ -440,8 +440,8 @@ class Voter {
     }
 
     @call({})
-    createFaculties({faculties}:{faculties:Faculty[]}){
-        if (this.isHaveRights({address:near.predecessorAccountId()})){
+    create_faculties({faculties}:{faculties:Faculty[]}){
+        if (this.is_have_rights({address:near.predecessorAccountId()})){
             const addedFaculties = []
 
             for (const faculty of faculties){
@@ -465,8 +465,8 @@ class Voter {
     }
 
     @call({})
-    deleteFaculties({faculties}:{faculties:string[]}){
-        if (this.isHaveRights({address:near.predecessorAccountId()})){
+    delete_faculties({faculties}:{faculties:string[]}){
+        if (this.is_have_rights({address:near.predecessorAccountId()})){
             const facultiesToDelete = []
             const departmentsToDelete = []
             const groupsToDelete = []
@@ -508,8 +508,8 @@ class Voter {
     }
 
     @call({})
-    createDepartments({departments}:{departments:Department[]}){
-        if (this.isHaveRights({address:near.predecessorAccountId()})){
+    create_departments({departments}:{departments:Department[]}){
+        if (this.is_have_rights({address:near.predecessorAccountId()})){
             const addedDepartments = []
             for (const department of departments){
                 if (this.faculties.get(department.facultyKey)){
@@ -532,8 +532,8 @@ class Voter {
     }
 
     @call({})
-    deleteDepartments({departments}:{departments:string[]}){
-        if (this.isHaveRights({address:near.predecessorAccountId()})){
+    delete_departments({departments}:{departments:string[]}){
+        if (this.is_have_rights({address:near.predecessorAccountId()})){
             const departmentsToDelete = []
             const groupsToDelete = []
             for (const department of departments){
@@ -564,8 +564,8 @@ class Voter {
     }
 
     @call({})
-    createGroups({groups}:{groups:Group[]}){
-        if (this.isHaveRights({address:near.predecessorAccountId()})){
+    create_groups({groups}:{groups:Group[]}){
+        if (this.is_have_rights({address:near.predecessorAccountId()})){
             const addedGroups = []
             for (const group of groups){
                 if (this.departments.get(group.departmentKey)){
@@ -588,8 +588,8 @@ class Voter {
     }
 
     @call({})
-    deleteGroups({groups}:{groups:string[]}){
-        if (this.isHaveRights({address:near.predecessorAccountId()})){
+    delete_groups({groups}:{groups:string[]}){
+        if (this.is_have_rights({address:near.predecessorAccountId()})){
             const groupsToDelete = []
             for (const group of groups){
                 this.groups.remove(group)
@@ -610,8 +610,8 @@ class Voter {
     }
 
     @call({})
-    createSingleInvite({hash, group}:{hash:string, group:string}){
-        if (this.isHaveRights({address:near.predecessorAccountId()})){
+    create_single_invite({hash, group}:{hash:string, group:string}){
+        if (this.is_have_rights({address:near.predecessorAccountId()})){
             if (this.groups.get(group)){
                 this.invites.set(hash, group)
                 return true
@@ -622,10 +622,10 @@ class Voter {
             throw Error('No have rights to create invites')
         }
     }
-    
+
     @call({})
-    createMultiInvites({hashes, group}:{hashes:string[], group:string}){
-        if (this.isHaveRights({address:near.predecessorAccountId()})){
+    create_multi_invites({hashes, group}:{hashes:string[], group:string}){
+        if (this.is_have_rights({address:near.predecessorAccountId()})){
             if (this.groups.get(group)){
                 for (const hash of hashes){
                     this.invites.set(hash, group)
@@ -640,18 +640,13 @@ class Voter {
     }
 
     @call({})
-    deleteAllInvites(){
-        return this.invites.clear()
-    }
-
-    @call({})
     regiter({firstName, lastName, code}:{firstName:string, lastName:string, code:string}){
         const hash = Object.values(near.sha256(bytes(code))).map(byte => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join('')
         const group = this.invites.get(hash)
         if (group){
             const groupExist = this.groups.get(group)
             if (groupExist){
-                const foundStudent = this.findStudentByAddress({address: near.predecessorAccountId()})
+                const foundStudent = this.find_student_by_address({address: near.predecessorAccountId()})
                 if (!foundStudent){
                     this.invites.remove(hash)
                     this.students.set(
