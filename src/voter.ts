@@ -616,7 +616,7 @@ class Voter {
                 this.invites.set(hash, group)
                 return true
             }else{
-                throw `Group does not exist`
+                throw Error(`Group does not exist`)
             }
         }else{
             throw Error('No have rights to create invites')
@@ -632,7 +632,7 @@ class Voter {
                 }
                 return true
             }else{
-                throw `Group does not exist`
+                throw Error(`Group does not exist`)
             }
         }else{
             throw Error('No have rights to create invites')
@@ -656,13 +656,13 @@ class Voter {
                     this.studentsCounter++
                     return true
                 }else{
-                    throw "Student with this address already exist"
+                    throw Error("Student with this address already exist")
                 }
             }else{
-                throw `Group does not exist`
+                throw Error(`Group does not exist`)
             }
         }else{
-            throw `Invite does not exist`
+            throw Error(`Invite does not exist`)
         }
     }
 }
